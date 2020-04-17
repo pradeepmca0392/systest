@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.js"></script>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+
+<title>status</title>
+
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+form {border: 3px solid #f1f1f1;}
+
+
+input[type=text]{
+  width: 40%;
+  padding: 10px 15px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 10%;
+}
+button:hover {
+  opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+<form  method="post" action="{% url 'homepage' %}">
+  {% csrf_token %}
+
+<div class="form-group">
+    <label for="nam"><b>Name</b></label>
+    <input class="form-control" type="text" placeholder="Enter Name" name="nam"><br>
+</div>
+
+<div class="form-group">
+    <label for="shp"><b>Shop Name</b></label>
+    <input class="form-control" type="text" placeholder="Enter Shop_name" name="shp" ><br>
+</div>
+
+<div class="form-group">
+      <label for="sts"><b>Status</b></label>
+    <input class="form-control" type="text" placeholder="Enter Status" name="sts"><br>
+</div>
+    <button name="submit1" type="submit" class="btn btn-success">submit</button>
+</form>
+
+<table id="tb2" class="table table-hover" Style="width:100%;">
+<thead style="background-color:#d9d9d9">
+<tr style="font-size:13px;">
+<th>Name</th>
+<th>Shop_name</th>
+<th>Status</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+    {% for i in tablelist %}
+    <tr>
+        <td>{{ i.Name }}</td>
+		<td>{{ i.Shop_Name }}</td>
+		<td>{{ i.Status }}</td>
+        <td>{{ i.Date }}</td>
+        <td class="table-action">
+		    <a id="{{ i.id }}" class="align-middle myeditdevid" href="javascript:" type="button">edit</a>
+		    <a id="{{ i.id }}" class="align-middle myaction" href="javascript:" type="button">delete</a>
+		</td>
+            <a href="javascript:"><i class="align-middle myeditdevid" data-bean-id={{ i.id }} data-feather="edit-2"></i></a>
+		    <a href="javascript:"><i class="align-middle myaction"  data-feather="trash"  data-bean-id={{ i.id }}></i></a>
+    </tr>
+    {% endfor %}
+</table>
+
+<script>
+
+var deveditbean;
+ $(document).ready(function() {
+ $('.myeditdevid').click(function() {
+
+          deveditbean = $(this).attr("id");
+            $.ajax({type: "GET",
+                url: {% url 'edit_val' %},
+                data: { id: deveditbean },
+                success:function(result){
+          console.log(result);
+
+          document.getElementById('editdevname').value = result.Name;
+          document.getElementById('editdevshop').value = result.Vehicle_Number;
+          document.getElementById('editdevstat').value =result.dev_id;
+
+          $("#Device_edit_modal").modal("show");
+        }});
+      });
+          console.log(deveditbean);
+
+     var bean;
+          $('.myaction').click(function() {
+          $("#Delmodal").modal("show");
+          bean = $(this).attr("id");
+      });
+
+    $('#devyes').click(function() {
+          console.log('yes');
+          $("#Delmodal").modal("hide");
+          console.log(bean);
+          $.ajax({type: "POST",
+                url: {% url 'delete_device' %},
+                data: { id: bean },
+                success:function(result){
+          console.log(result);
+        }});
+
+      });
+
+    });
+
+</script>
+
+<div class="modal fade" id="Device_edit_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">Edit Status</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form method="post" action={% url 'homepage' %}>
+     {% csrf_token %}
+<div class="form-group">
+    <label for="nam"><b>Name</b></label>
+    <input class="form-control" type="text" id="editdevname" placeholder="Enter Name" name="nam"><br>
+</div>
+
+<div class="form-group">
+    <label for="shp"><b>Shop Name</b></label>
+    <input class="form-control" type="text" id="editdevshop" placeholder="Enter Shop_name" name="shp" ><br>
+</div>
+
+<div class="form-group">
+    <label for="sts"><b>Status</b></label>
+    <input class="form-control" type="text"  id="editdevstat" placeholder="Enter Status" name="sts"><br>
+</div>
+
+    <button name="submit2" type="submit" class="btn btn-success">submit</button>
+</form>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="Delmodal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span></button>
+</div>
+
+<div class="modal-body m-3">
+    <p class="mb-0"> Are you sure you want to delete?</p>
+</div>
+
+<div class="modal-footer">
+	<button type="button" class="btn btn-secondary" data-dismiss="modal" style="width:70px;">Close</button>
+	<form method="post" action="{% url 'homepage' %}">{% csrf_token %}
+        <button id="devyes" type="submit" class="btn btn-danger" style="width:70px;">Yes</button></form>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
